@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SIX M STORE | Admin Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,"Noto Sans Bengali","Noto Sans",sans-serif;background:#edf4fb;color:#172033}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#052f73,#0875d1)}
+.login-card{width:min(420px,100%);background:#fff;border-radius:22px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.22)}
+.logo-title{text-align:center;color:#063b8f;font-size:25px;font-weight:900}
+.sub{text-align:center;color:#64748b;margin:6px 0 24px}
+.field{margin:12px 0}
+.field label{display:block;font-weight:800;font-size:13px;margin-bottom:6px}
+.field input,.field select{width:100%;height:45px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px;outline:0}
+.login-btn,.primary{width:100%;border:0;border-radius:10px;padding:12px;background:linear-gradient(135deg,#063b8f,#0875d1);color:#fff;font-weight:900}
+.note{font-size:11px;color:#64748b;text-align:center;margin-top:12px;line-height:1.5}
+.app{display:none;min-height:100vh}
+.top{background:linear-gradient(135deg,#063b8f,#0875d1);color:#fff;padding:13px 16px;position:sticky;top:0;z-index:5}
+.top-inner{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-size:20px;font-weight:900}.role{font-size:11px;opacity:.9}
+.logout{border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:8px 11px;font-weight:800}
+.wrap{max-width:1200px;margin:auto;padding:18px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.card{background:#fff;border:1px solid #d7e4ef;border-radius:15px;padding:17px;box-shadow:0 3px 12px rgba(6,59,143,.06)}
+.kpi-label{font-size:12px;color:#64748b;font-weight:800}.kpi{font-size:26px;font-weight:900;color:#063b8f;margin-top:4px}
+.section{margin-top:16px}.section h2{font-size:18px;margin-bottom:10px}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.quick button{border:1px solid #cbddeb;background:#fff;border-radius:12px;padding:14px 8px;font-weight:900;color:#063b8f}
+.panel{background:#fff;border:1px solid #d7e4ef;border-radius:15px;padding:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{width:auto;padding:10px 15px}
+.secondary{border:1px solid #bfd2e3;background:#f7fbff;color:#063b8f;border-radius:9px;font-weight:900}
+.danger{border:0;background:#dc2626;color:#fff;border-radius:9px;padding:10px 15px;font-weight:900}
+.table-wrap{overflow:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{padding:10px;border-bottom:1px solid #e5edf5;text-align:left;font-size:12px}
+th{background:#f5f9fd;color:#063b8f}
+.empty{padding:20px;text-align:center;color:#64748b}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.quick{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.wrap{padding:12px}.row{grid-template-columns:1fr}.grid{gap:8px}.card{padding:13px}.kpi{font-size:22px}}
+</style>
+</head>
+<body>
+
+<div id="login" class="login">
+  <div class="login-card">
+    <div class="logo-title">SIX M STORE</div>
+    <div class="sub">Super Shop Management</div>
+    <div class="field">
+      <label>Admin ID</label>
+      <input id="adminId" value="admin" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Demo PIN</label>
+      <input id="adminPin" type="password" placeholder="ডেমো PIN">
+    </div>
+    <button class="login-btn" onclick="login()">🔐 Admin Login</button>
+    <div class="note">এটি প্রথম ধাপের Dashboard prototype। আসল multi-admin নিরাপত্তা ও online database পরের ধাপে server-side authentication দিয়ে করা হবে।</div>
+  </div>
+</div>
+
+<div id="app" class="app">
+  <div class="top">
+    <div class="top-inner">
+      <div><div class="brand">SIX M STORE</div><div class="role">Super Shop Management Dashboard</div></div>
+      <button class="logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <div class="grid">
+      <div class="card"><div class="kpi-label">আজকের বিক্রি</div><div id="salesKpi" class="kpi">৳ 0</div></div>
+      <div class="card"><div class="kpi-label">আজকের খরচ</div><div id="expenseKpi" class="kpi">৳ 0</div></div>
+      <div class="card"><div class="kpi-label">আজকের লাভ*</div><div id="profitKpi" class="kpi">৳ 0</div></div>
+      <div class="card"><div class="kpi-label">Website Products</div><div id="productKpi" class="kpi">0</div></div>
+    </div>
+
+    <section class="section">
+      <h2>⚡ দ্রুত কাজ</h2>
+      <div class="quick">
+        <button onclick="showAdd('sale')">🧾 নতুন বিক্রি</button>
+        <button onclick="showAdd('expense')">💸 খরচ যোগ করুন</button>
+        <button onclick="showRecords()">📋 হিসাব দেখুন</button>
+        <button onclick="exportData()">⬇️ Backup</button>
+      </div>
+    </section>
+
+    <section class="section panel" id="entryPanel" style="display:none">
+      <h2 id="entryTitle">নতুন হিসাব</h2>
+      <div class="row">
+        <div class="field"><label>বিবরণ</label><input id="entryName" placeholder="যেমন: চাল ৫ কেজি"></div>
+        <div class="field"><label>টাকা</label><input id="entryAmount" type="number" min="0" placeholder="0"></div>
+      </div>
+      <div class="actions">
+        <button class="primary" style="width:auto" onclick="saveEntry()">সংরক্ষণ</button>
+        <button class="secondary" onclick="hideEntry()">বাতিল</button>
+      </div>
+    </section>
+
+    <section class="section panel">
+      <h2>📦 বর্তমান Website Product Database</h2>
+      <div id="productInfo" class="empty">Products.js থেকে তথ্য পড়া হচ্ছে...</div>
+    </section>
+
+    <section class="section panel">
+      <h2>📊 হিসাবের রেকর্ড</h2>
+      <div class="actions">
+        <button class="secondary" onclick="showRecords()">Refresh</button>
+        <button class="danger" onclick="clearRecords()">সব Local হিসাব মুছুন</button>
+      </div>
+      <div id="records" class="table-wrap"></div>
+    </section>
+
+    <p class="note" style="margin:18px 0">* লাভের হিসাবের পূর্ণ সংস্করণে পণ্যের ক্রয়মূল্য, বিক্রয়মূল্য, স্টক, Purchase ও Expense যুক্ত হবে।</p>
+  </main>
+</div>
+
+<script src="Products.js"></script>
+<script>
+let entryType="sale";
+
+function login(){
+  const id=document.getElementById("adminId").value.trim();
+  const pin=document.getElementById("adminPin").value;
+  if(id==="admin" && pin==="1234"){
+    sessionStorage.setItem("sixm_admin_demo","1");
+    openApp();
+  }else{
+    alert("ডেমো Login: Admin ID = admin, PIN = 1234");
+  }
+}
+function openApp(){
+  document.getElementById("login").style.display="none";
+  document.getElementById("app").style.display="block";
+  loadDashboard();
+}
+function logout(){
+  sessionStorage.removeItem("sixm_admin_demo");
+  location.reload();
+}
+function money(n){return "৳ "+Number(n||0).toLocaleString("en-BD")}
+function key(){return "sixm_admin_records"}
+function records(){
+  try{return JSON.parse(localStorage.getItem(key())||"[]")}catch(e){return []}
+}
+function saveRecords(a){localStorage.setItem(key(),JSON.stringify(a))}
+function today(){
+  const d=new Date();return d.toISOString().slice(0,10)
+}
+function loadDashboard(){
+  let a=records(), t=today();
+  let sales=a.filter(x=>x.type==="sale"&&x.date===t).reduce((s,x)=>s+x.amount,0);
+  let exp=a.filter(x=>x.type==="expense"&&x.date===t).reduce((s,x)=>s+x.amount,0);
+  document.getElementById("salesKpi").textContent=money(sales);
+  document.getElementById("expenseKpi").textContent=money(exp);
+  document.getElementById("profitKpi").textContent=money(sales-exp);
+  let count=0;
+  try{count=(categories||[]).reduce((n,c)=>n+(c.products||[]).length,0)}catch(e){}
+  document.getElementById("productKpi").textContent=count;
+  document.getElementById("productInfo").innerHTML="<b>"+count+"</b>টি product record বর্তমানে Products.js-এ আছে।<br><span style='color:#64748b'>পরের ধাপে প্রতিটি পণ্যের ক্রয়মূল্য, stock ও supplier data এখানে আনা হবে।</span>";
+  showRecords();
+}
+function showAdd(type){
+  entryType=type;
+  document.getElementById("entryTitle").textContent=type==="sale"?"🧾 নতুন বিক্রি":"💸 নতুন খরচ";
+  document.getElementById("entryPanel").style.display="block";
+  document.getElementById("entryName").value="";
+  document.getElementById("entryAmount").value="";
+  document.getElementById("entryPanel").scrollIntoView({behavior:"smooth"});
+}
+function hideEntry(){document.getElementById("entryPanel").style.display="none"}
+function saveEntry(){
+  const name=document.getElementById("entryName").value.trim();
+  const amount=Number(document.getElementById("entryAmount").value);
+  if(!name||!(amount>0)) return alert("বিবরণ ও সঠিক টাকা দিন।");
+  let a=records();
+  a.unshift({id:Date.now(),type:entryType,name,amount,date:today(),time:new Date().toLocaleTimeString("bn-BD")});
+  saveRecords(a); hideEntry(); loadDashboard();
+}
+function showRecords(){
+  const a=records();
+  const box=document.getElementById("records");
+  if(!a.length){box.innerHTML='<div class="empty">এখনো কোনো হিসাব যোগ করা হয়নি।</div>';return}
+  box.innerHTML="<table><thead><tr><th>তারিখ</th><th>সময়</th><th>ধরন</th><th>বিবরণ</th><th>টাকা</th></tr></thead><tbody>"+
+    a.map(x=>"<tr><td>"+x.date+"</td><td>"+x.time+"</td><td>"+(x.type==="sale"?"বিক্রি":"খরচ")+"</td><td>"+escapeHtml(x.name)+"</td><td>"+money(x.amount)+"</td></tr>").join("")+
+    "</tbody></table>";
+}
+function clearRecords(){
+  if(confirm("Local হিসাবগুলো মুছে ফেলবেন?")){localStorage.removeItem(key());loadDashboard()}
+}
+function exportData(){
+  const data={records:records(),exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="sixm-store-backup.json";a.click();
+  URL.revokeObjectURL(a.href);
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+if(sessionStorage.getItem("sixm_admin_demo")==="1")openApp();
+</script>
+</body>
+</html>
