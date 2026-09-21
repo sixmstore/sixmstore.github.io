@@ -469,7 +469,7 @@ footer{padding-bottom:90px}
 <input type="text" id="customerName" placeholder="আপনার নাম লিখুন">
 <input type="tel" id="customerPhone" placeholder="মোবাইল নম্বর লিখুন">
 <textarea id="customerAddress" placeholder="সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন"></textarea>
-<button class="send-order" onclick="sendOrder()">💬 WhatsApp-এ অর্ডার পাঠান</button>
+<button class="send-order" onclick="sendOrder()">🛒 অর্ডার কনফার্ম করুন</button>
 </div>
 
 </div>
@@ -1345,7 +1345,18 @@ document.getElementById("orderPanel").addEventListener("click",e=>{
 if(e.target===e.currentTarget)closeOrder()
 });
 
-function sendOrder(){
+const SIXM_API_URL = "https://script.google.com/macros/s/AKfycbyZ_JDRRXlfpc4Zade00tlrgBUTBcwa-L-Eqfbry06RtunRzHvWDxXvkhcWrWE9O2dJVw/exec";
+
+async function sendToSixMStoreAPI(payload){
+  return fetch(SIXM_API_URL,{
+    method:"POST",
+    mode:"no-cors",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(payload)
+  });
+}
+
+async function sendOrder(){
 
 if(!orderList.length)
 return alert("দয়া করে আগে অন্তত একটি পণ্য অর্ডারে যোগ করুন।");
@@ -1358,54 +1369,40 @@ if(!n)return alert("দয়া করে আপনার নাম লিখু�
 if(!p)return alert("দয়া করে আপনার মোবাইল নম্বর লিখুন.");
 if(!a)return alert("দয়া করে আপনার সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন.");
 
-let m=
-"🛒 SIX M STORE - নতুন অর্ডার\n\n"+
-"👤 নাম: "+n+"\n"+
-"📞 মোবাইল: "+p+"\n"+
-"📍 ঠিকানা: "+a+"\n\n"+
-"📦 অর্ডারের তালিকা:\n\n",
-s=0,
-pending=false;
-
-orderList.forEach((x,i)=>{
-
-m+=
-(i+1)+". "+x.name+"\n"+
-"   🏷️ ব্র্যান্ড: "+x.brand+"\n"+
-"   📦 সাইজ: "+x.size+"\n"+
-"   🔢 পরিমাণ: "+x.qty+"\n";
-
-if(x.price>0){
-
-const t=x.price*x.qty;
-
-s+=t;
-
-m+="   💰 মূল্য: ৳"+x.price+" × "+x.qty+" = ৳"+t+"\n"
-
-}else{
-
-pending=true;
-
-m+="   💰 মূল্য: পরে জানানো হবে\n"
-}
-
-m+="\n"
+let s=0,pending=false;
+orderList.forEach(x=>{
+  if(Number(x.price)>0)s+=Number(x.price)*Number(x.qty);
+  else pending=true;
 });
+const delivery=99;
+const total=s+delivery;
+const payload={
+  action:"createOrder",
+  customerName:n, phone:p, address:a,
+  items:orderList.map(x=>({name:x.name,brand:x.brand,size:x.size,price:Number(x.price)||0,qty:Number(x.qty)||1})),
+  subtotal:s, deliveryCharge:delivery, total:total,
+  paymentMethod:"Cash On Delivery",
+  notes:pending?"কিছু পণ্যের মূল্য পরে নিশ্চিত করতে হবে।":""
+};
 
-m+=
-"💰 নির্ধারিত পণ্যের মোট: ৳"+s+"\n"+
-"🚚 ডেলিভারি চার্জ: ৳99\n";
+const btn=document.querySelector('[onclick="sendOrder()"]');
+if(btn){btn.disabled=true;btn.textContent="⏳ অর্ডার পাঠানো হচ্ছে...";}
+try{
+  await sendToSixMStoreAPI(payload);
+  alert("✅ আপনার অর্ডারটি SIX M STORE-এ পাঠানো হয়েছে।
 
-m+=pending?
-"⚠️ কিছু পণ্যের মূল্য পরে জানানো হবে.\n💵 চূড়ান্ত মোট মূল্য: মূল্য নিশ্চিত করার পর জানানো হবে.\n":
-"💵 সর্বমোট: ৳"+(s+99)+"\n";
-
-m+="\nধন্যবাদ SIX M STORE-এর সাথে অর্ডার করার জন্য।";
-
-window.location.href=
-"https://wa.me/8801737781096?text="+
-encodeURIComponent(m)
+অর্ডারটি এখন WhatsApp না খুলেই Google Database-এ জমা হবে। দোকান থেকে যোগাযোগ করা হবে।");
+  orderList=[];
+  saveCart(); renderOrder();
+  document.getElementById("customerName").value="";
+  document.getElementById("customerPhone").value="";
+  document.getElementById("customerAddress").value="";
+  closeOrder();
+}catch(e){
+  alert("❌ অর্ডার পাঠানো সম্ভব হয়নি। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।");
+}finally{
+  if(btn){btn.disabled=false;btn.textContent="🛒 অর্ডার কনফার্ম করুন";}
+}
 }
 
 function openProductRequest(){
