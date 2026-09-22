@@ -1389,7 +1389,7 @@ const btn=document.querySelector('[onclick="sendOrder()"]');
 if(btn){btn.disabled=true;btn.textContent="⏳ অর্ডার পাঠানো হচ্ছে...";}
 try{
   await sendToSixMStoreAPI(payload);
-  alert("✅ আপনার অর্ডারটি SIX M STORE-এ পাঠানো হয়েছে।\n\nঅর্ডারটি এখন WhatsApp না খুলেই Google Database-এ জমা হবে। দোকান থেকে যোগাযোগ করা হবে।");
+  alert("✅ আপনার অর্ডারটি SIX M STORE-এ পাঠানো হয়েছে।\n\n আমাদের প্রতিনিধি খুব শীঘ্রই আপনার সাথে যোগাযোগ করবেন");
   orderList=[];
   saveCart(); renderOrder();
   document.getElementById("customerName").value="";
