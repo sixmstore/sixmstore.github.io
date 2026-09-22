@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIX M STORE | Admin Panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,"Noto Sans Bengali",sans-serif;background:#f4f7fb;color:#172033}
+button,input,select{font:inherit}
+.hidden{display:none!important}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#063b8f,#0875d1)}
+.login{width:100%;max-width:430px;background:#fff;border-radius:20px;padding:25px;box-shadow:0 15px 50px #0004}
+.login h1{text-align:center;color:#063b8f;margin-bottom:5px}.login p{text-align:center;color:#667085;margin-bottom:20px}
+input,select{width:100%;padding:12px;border:1px solid #ccd5e0;border-radius:10px;margin:6px 0 12px;outline:none}
+.btn{border:0;border-radius:10px;padding:12px 16px;cursor:pointer;font-weight:bold}
+.primary{background:#063b8f;color:#fff}.green{background:#20b858;color:#fff}.red{background:#e74c3c;color:#fff}
+.login .btn{width:100%}.error{color:#e74c3c;margin:8px 0;font-size:14px}
+header{background:linear-gradient(135deg,#063b8f,#0875d1);color:#fff;padding:15px;position:sticky;top:0;z-index:10}
+.head{max-width:1200px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.head h1{font-size:22px}.head small{opacity:.9}
+main{max-width:1200px;margin:auto;padding:20px 15px 40px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px}
+.card{background:#fff;border-radius:15px;padding:18px;box-shadow:0 3px 14px #00000010}.card b{display:block;font-size:25px;color:#063b8f;margin-top:5px}
+.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:15px}.tab{white-space:nowrap;background:#fff;border:1px solid #dbe3ed;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:bold}.tab.active{background:#063b8f;color:#fff}
+.panel{background:#fff;border-radius:16px;padding:18px;box-shadow:0 3px 14px #00000010;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:650px}.table th,.table td{padding:10px;border-bottom:1px solid #eee;text-align:left}.table th{background:#f4f7fb;color:#063b8f}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.notice{background:#fff8df;padding:12px;border-radius:10px;color:#765b00;margin-bottom:15px}
+.success{background:#eaf9ef;color:#14783a;padding:10px;border-radius:10px;margin:8px 0}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-wrap">
+  <div class="login">
+    <h1>👑 SIX M STORE</h1>
+    <p>Admin Panel Login</p>
+    <input id="loginEmail" type="email" placeholder="Admin Email">
+    <input id="loginPassword" type="password" placeholder="Password">
+    <button class="btn primary" onclick="login()">🔐 Login</button>
+    <div id="loginError" class="error"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+<header>
+  <div class="head">
+    <div>
+      <h1>📦 SIX M STORE Admin Panel</h1>
+      <small id="who"></small>
+    </div>
+    <button class="btn red" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<main>
+  <div id="notice" class="notice hidden"></div>
+
+  <div class="cards">
+    <div class="card">মোট পণ্য<b id="productCount">0</b></div>
+    <div class="card">মোট Stock<b id="stockCount">0</b></div>
+    <div class="card">Cash Sale<b id="salesCount">0</b></div>
+    <div class="card">Order<b id="orderCount">0</b></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('products',this)">📦 পণ্য ও Stock</button>
+    <button class="tab" onclick="showTab('sales',this)">🏪 সরাসরি বিক্রি</button>
+    <button class="tab" onclick="showTab('orders',this)">🛒 Online Order</button>
+  </div>
+
+  <section id="productsTab" class="panel">
+    <h2>📦 পণ্য যোগ / Stock Update</h2>
+    <div class="grid" style="margin-top:12px">
+      <div><label>পণ্যের নাম</label><input id="pName" placeholder="যেমন: মিনিকেট চাল"></div>
+      <div><label>ব্র্যান্ড</label><input id="pBrand" placeholder="যেমন: মিনিকেট"></div>
+      <div><label>সাইজ</label><input id="pSize" placeholder="যেমন: ১ কেজি"></div>
+      <div><label>বিক্রয় মূল্য (৳)</label><input id="pPrice" type="number" min="0" value="0"></div>
+      <div><label>বর্তমান Stock</label><input id="pStock" type="number" min="0" value="0"></div>
+      <div><label>ক্যাটাগরি</label><input id="pCategory" placeholder="যেমন: চাল ও ডাল"></div>
+    </div>
+    <button class="btn green" onclick="addProduct()">➕ পণ্য যোগ করুন</button>
+
+    <div class="table-wrap" style="margin-top:18px">
+      <table class="table">
+        <thead><tr><th>পণ্য</th><th>ব্র্যান্ড</th><th>সাইজ</th><th>দাম</th><th>Stock</th><th>ক্যাটাগরি</th><th>Action</th></tr></thead>
+        <tbody id="productRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="salesTab" class="panel hidden">
+    <h2>🏪 দোকান থেকে সরাসরি বিক্রি</h2>
+    <p style="color:#667085;margin:5px 0 12px">এখানে বিক্রি যোগ করলে পণ্যের Stock কমবে এবং sales-এ স্থায়ী হিসাব থাকবে।</p>
+    <div class="grid">
+      <div><label>Product ID</label><input id="sProductId" placeholder="নিচের তালিকা থেকে ID"></div>
+      <div><label>পরিমাণ</label><input id="sQty" type="number" min="1" value="1"></div>
+      <div><label>বিক্রয় মূল্য/ইউনিট</label><input id="sPrice" type="number" min="0" value="0"></div>
+    </div>
+    <button class="btn green" onclick="recordSale()">💵 বিক্রি সংরক্ষণ করুন</button>
+    <div class="table-wrap" style="margin-top:18px">
+      <table class="table">
+        <thead><tr><th>সময়</th><th>Product ID</th><th>Qty</th><th>Unit Price</th><th>Total</th><th>By</th></tr></thead>
+        <tbody id="saleRows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="ordersTab" class="panel hidden">
+    <h2>🛒 Online Orders</h2>
+    <p style="color:#667085;margin-top:5px">WhatsApp order বর্তমানে আপনার মূল Website-এর মাধ্যমে যাবে। Firebase order collection ব্যবহার করলে ভবিষ্যতে এখানেই order management করা যাবে।</p>
+    <div class="table-wrap" style="margin-top:15px">
+      <table class="table">
+        <thead><tr><th>সময়</th><th>Customer</th><th>Phone</th><th>Status</th></tr></thead>
+        <tbody id="orderRows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc,
+  deleteDoc, query, orderBy, limit, serverTimestamp, runTransaction
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCPmGhoRLD6dm-R6tJZ7uorXvH6XhiXDdw",
+  authDomain: "six-m-store-ddecf.firebaseapp.com",
+  projectId: "six-m-store-ddecf",
+  storageBucket: "six-m-store-ddecf.firebasestorage.app",
+  messagingSenderId: "705330426810",
+  appId: "1:705330426810:web:99eb9f96bf781582e72383",
+  measurementId: "G-LQ9TCPCT1W"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.login = async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const err = document.getElementById("loginError");
+  err.textContent = "";
+  try { await signInWithEmailAndPassword(auth,email,password); }
+  catch(e){ err.textContent = "Login হয়নি: " + e.message; }
+};
+
+window.logout = () => signOut(auth);
+
+onAuthStateChanged(auth, async user => {
+  if(!user){
+    document.getElementById("loginScreen").classList.remove("hidden");
+    document.getElementById("app").classList.add("hidden");
+    return;
+  }
+  const uref = doc(db,"users",user.uid);
+  const usnap = await getDoc(uref);
+  if(!usnap.exists()){
+    await signOut(auth);
+    document.getElementById("loginError").textContent = "এই Account-এর Admin profile নেই।";
+    return;
+  }
+  const role = usnap.data().role;
+  if(role !== "superAdmin" && role !== "admin"){
+    await signOut(auth);
+    document.getElementById("loginError").textContent = "আপনার Admin permission নেই।";
+    return;
+  }
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("who").textContent = (role==="superAdmin"?"👑 Super Admin":"👤 Admin") + " • " + user.email;
+  await refreshAll();
+});
+
+window.showTab = (name,btn) => {
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  btn.classList.add("active");
+  ["products","sales","orders"].forEach(x=>document.getElementById(x+"Tab").classList.toggle("hidden",x!==name));
+};
+
+function msg(text,good=true){
+  const n=document.getElementById("notice");
+  n.textContent=text;n.className=good?"success":"notice";
+  setTimeout(()=>n.classList.add("hidden"),3500);
+}
+
+window.addProduct = async () => {
+  const data={
+    name:document.getElementById("pName").value.trim(),
+    brand:document.getElementById("pBrand").value.trim(),
+    size:document.getElementById("pSize").value.trim(),
+    price:Number(document.getElementById("pPrice").value)||0,
+    stock:Number(document.getElementById("pStock").value)||0,
+    category:document.getElementById("pCategory").value.trim(),
+    createdAt:serverTimestamp(),updatedAt:serverTimestamp()
+  };
+  if(!data.name){alert("পণ্যের নাম দিন");return}
+  await addDoc(collection(db,"products"),data);
+  ["pName","pBrand","pSize","pCategory"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("pPrice").value=0;document.getElementById("pStock").value=0;
+  msg("পণ্য যোগ হয়েছে");await refreshProducts();
+};
+
+async function refreshProducts(){
+  const snap=await getDocs(collection(db,"products"));
+  const rows=document.getElementById("productRows");rows.innerHTML="";
+  let stock=0;
+  snap.forEach(d=>{
+    const p=d.data();stock+=Number(p.stock||0);
+    rows.innerHTML+=`<tr>
+      <td>${esc(p.name)}</td><td>${esc(p.brand||"")}</td><td>${esc(p.size||"")}</td>
+      <td>৳${Number(p.price||0)}</td><td>${Number(p.stock||0)}</td><td>${esc(p.category||"")}</td>
+      <td><div class="row-actions"><button class="btn primary" onclick="editStock('${d.id}',${Number(p.stock||0)})">Stock</button><button class="btn red" onclick="removeProduct('${d.id}')">Delete</button></div></td>
+    </tr>`;
+  });
+  document.getElementById("productCount").textContent=snap.size;
+  document.getElementById("stockCount").textContent=stock;
+}
+window.editStock=async(id,current)=>{
+  const v=prompt("নতুন Stock লিখুন",current);
+  if(v===null)return;
+  const n=Number(v);if(!Number.isFinite(n)||n<0){alert("সঠিক সংখ্যা দিন");return}
+  await updateDoc(doc(db,"products",id),{stock:n,updatedAt:serverTimestamp()});
+  msg("Stock আপডেট হয়েছে");await refreshProducts();
+};
+window.removeProduct=async id=>{
+  if(!confirm("এই পণ্যটি মুছে ফেলবেন?"))return;
+  await deleteDoc(doc(db,"products",id));msg("পণ্য মুছে গেছে");await refreshProducts();
+};
+
+window.recordSale=async()=>{
+  const pid=document.getElementById("sProductId").value.trim();
+  const qty=Number(document.getElementById("sQty").value);
+  const price=Number(document.getElementById("sPrice").value);
+  if(!pid||qty<1||price<0){alert("Product ID, Quantity এবং Price দিন");return}
+  const user=auth.currentUser;
+  await runTransaction(db,async tx=>{
+    const pref=doc(db,"products",pid);const ps=await tx.get(pref);
+    if(!ps.exists()) throw new Error("Product ID পাওয়া যায়নি");
+    const p=ps.data();const stock=Number(p.stock||0);
+    if(stock<qty) throw new Error("পর্যাপ্ত Stock নেই");
+    tx.update(pref,{stock:stock-qty,updatedAt:serverTimestamp()});
+    tx.set(doc(collection(db,"sales")),{productId:pid,qty,unitPrice:price,total:qty*price,createdAt:serverTimestamp(),createdBy:user.uid});
+  });
+  msg("সরাসরি বিক্রির হিসাব সংরক্ষণ হয়েছে");await refreshAll();
+};
+
+async function refreshSales(){
+  const snap=await getDocs(query(collection(db,"sales"),orderBy("createdAt","desc"),limit(50)));
+  const rows=document.getElementById("saleRows");rows.innerHTML="";
+  snap.forEach(d=>{const s=d.data();rows.innerHTML+=`<tr><td>${time(s.createdAt)}</td><td>${esc(s.productId)}</td><td>${s.qty}</td><td>৳${s.unitPrice}</td><td>৳${s.total}</td><td>${esc(s.createdBy||"")}</td></tr>`});
+  document.getElementById("salesCount").textContent=snap.size;
+}
+async function refreshOrders(){
+  const snap=await getDocs(query(collection(db,"orders"),orderBy("createdAt","desc"),limit(50))).catch(()=>null);
+  const rows=document.getElementById("orderRows");rows.innerHTML="";
+  if(!snap){return}
+  snap.forEach(d=>{const o=d.data();rows.innerHTML+=`<tr><td>${time(o.createdAt)}</td><td>${esc(o.customerName||"")}</td><td>${esc(o.customerPhone||"")}</td><td>${esc(o.status||"new")}</td></tr>`});
+  document.getElementById("orderCount").textContent=snap.size;
+}
+async function refreshAll(){await refreshProducts();await refreshSales();await refreshOrders()}
+function time(t){return t?.toDate?t.toDate().toLocaleString("bn-BD"):"—"}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+</script>
+</body>
+</html>

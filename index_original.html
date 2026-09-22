@@ -3746,23 +3746,7 @@ closeOrder();
    WHATSAPP ORDER
 ========================================================= */
 
-/* =========================================================
-   GOOGLE SHEETS BACKEND CONFIG
-   Paste your deployed Apps Script Web App URL here.
-========================================================= */
-const SIXM_GAS_URL = "PASTE_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
-
-function sendOrderToSheets(payload){
-  if(!SIXM_GAS_URL || SIXM_GAS_URL.includes("PASTE_GOOGLE")) return Promise.resolve(false);
-  return fetch(SIXM_GAS_URL,{
-    method:"POST",
-    mode:"no-cors",
-    headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify({action:"createOrder",...payload})
-  }).then(()=>true).catch(()=>false);
-}
-
-async function sendOrder(){
+function sendOrder(){
 
 if(
 orderList.length===0
@@ -3991,30 +3975,21 @@ message+=
 "\nধন্যবাদ SIX M STORE-এর সাথে অর্ডার করার জন্য.";
 
 
-const orderId="SXM-"+Date.now().toString().slice(-8);
-const payload={
-  orderId, customerName:name, customerPhone:phone, customerAddress:address,
-  items:orderList.map(item=>({name:item.name,brand:item.brand,size:item.size,qty:item.qty,price:item.price})),
-  subtotal, deliveryCharge:delivery, hasPending, source:"Website"
-};
+const whatsappURL=
+"https://wa.me/8801737781096?text="+
+encodeURIComponent(
+message
+);
 
-const sentToSheets=await sendOrderToSheets(payload);
 
-orderHistory.unshift({id:orderId,date:new Date().toLocaleString("bn-BD"),status:sentToSheets?"অর্ডার গ্রহণ করা হয়েছে":"অর্ডার প্রস্তুত"});
+const orderId="SXM-"+Date.now().toString().slice(-6);
+orderHistory.unshift({id:orderId,date:new Date().toLocaleString("bn-BD"),status:"WhatsApp-এ পাঠানো হয়েছে"});
 orderHistory=orderHistory.slice(0,10);
 saveOrderHistory();
 renderRecentOrders();
 
-if(sentToSheets){
-  alert("✅ আপনার অর্ডার সফলভাবে গ্রহণ করা হয়েছে।\nঅর্ডার ID: "+orderId+"\nSIX M STORE থেকে দ্রুত যোগাযোগ করা হবে।");
-  clearOrder();
-  closeOrder();
-  return;
-}
-
-/* Backend URL এখনো বসানো না থাকলে পুরনো WhatsApp fallback */
-const whatsappURL="https://wa.me/8801737781096?text="+encodeURIComponent(message);
-window.location.href=whatsappURL;
+window.location.href=
+whatsappURL;
 
 }
 
