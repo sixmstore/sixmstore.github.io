@@ -229,40 +229,60 @@ let cart=JSON.parse(localStorage.getItem(CART_KEY)||"[]"),wishlist=JSON.parse(lo
 function getProducts(){return Array.isArray(window.products)?window.products:typeof products!=="undefined"&&Array.isArray(products)?products:[]}
 function getCategories(){return Array.isArray(window.categories)?window.categories:typeof categories!=="undefined"&&Array.isArray(categories)?categories:[]}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
-function imgCandidates(p){let n=typeof p==="object"?p.image:p; if(!n)return[];
+function imgCandidates(p){
+let n=typeof p==="object"?p.image:p; if(!n)return[];
 if(/^https?:\/\//.test(n)||n.startsWith("data:"))return[n];
 let clean=n.replace(/^\.?\//,"").replace(/^images\//,"").replace(/^image\//,"");
-return["images/"+clean,"./images/"+clean,"image/"+clean,"./image/"+clean,clean,"images/"+clean+".jpg","images/"+clean+".png","image/"+clean+".jpg","image/"+clean+".png"]}
-function imageHTML(p){let a=imgCandidates(p),src=a[0]||"";
-return `<img src="${esc(src)}" alt="${esc(p.name||"Product")}" loading="lazy" onerror="nextImage(this,${JSON.stringify(a)},0)">`}
+return["images/"+clean,"./images/"+clean,"image/"+clean,"./image/"+clean,clean,"images/"+clean+".jpg","images/"+clean+".png","image/"+clean+".jpg","image/"+clean+".png"]
+}
+function imageHTML(p){
+let a=imgCandidates(p),src=a[0]||"";
+return `<img src="${esc(src)}" alt="${esc(p.name||"Product")}" loading="lazy" onerror="nextImage(this,${JSON.stringify(a)},0)">`
+}
 function nextImage(el,a,i){i++;if(i<a.length){el.src=a[i]}else{el.style.display="none"}}
-function init(){const cs=getCategories(),sel=document.getElementById("categorySelect");cs.forEach(c=>{let n=typeof c==="string"?c:c.name;if(n){let o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o)}});
-renderCategoryChips();displayProducts();renderLive();updateCart();}
-function renderCategoryChips(){let box=document.getElementById("categoryChips");box.innerHTML="";
-getCategories().forEach(c=>{let n=typeof c==="string"?c:c.name;if(n)box.innerHTML+=`<button class="chip ${currentCategory===n?"active":""}" onclick="selectCategory(${JSON.stringify(n)})">${esc(n)}</button>`})}
+function init(){
+const cs=getCategories(),sel=document.getElementById("categorySelect");
+cs.forEach(c=>{let n=typeof c==="string"?c:c.name;if(n){let o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o)}});
+renderCategoryChips();displayProducts();renderLive();updateCart();
+}
+function renderCategoryChips(){
+let box=document.getElementById("categoryChips");box.innerHTML="";
+getCategories().forEach(c=>{let n=typeof c==="string"?c:c.name;if(n)box.innerHTML+=`<button class="chip ${currentCategory===n?"active":""}" onclick="selectCategory(${JSON.stringify(n)})">${esc(n)}</button>`})
+}
 function selectCategory(c){currentCategory=c||"";bestSellerMode=false;wishlistMode=false;document.getElementById("categorySelect").value=currentCategory;renderCategoryChips();displayProducts()}
-function clearFilters(){currentCategory="";searchTerm="";bestSellerMode=false;wishlistMode=false;document.getElementById("searchInput").value="";document.getElementById("categorySelect").value="";renderCategoryChips();displayProducts()}
+function clearFilters(){
+currentCategory="";searchTerm="";bestSellerMode=false;wishlistMode=false;document.getElementById("searchInput").value="";document.getElementById("categorySelect").value="";renderCategoryChips();displayProducts()
+}
 function handleSearch(v){searchTerm=v.trim().toLowerCase();bestSellerMode=false;wishlistMode=false;displayProducts()}
 function showBestSellers(){bestSellerMode=true;wishlistMode=false;currentCategory="";displayProducts()}
 function showSpecialOffers(){bestSellerMode=false;wishlistMode=false;filterByBadge("offer")}
 function filterByBadge(b){bestSellerMode=false;wishlistMode=false;currentCategory="";let all=getProducts();currentProducts=all.filter(p=>String(p.badge||"").toLowerCase().includes(b)||p.offer||p.specialOffer);renderProducts(currentProducts);document.getElementById("productTitle").textContent="বিশেষ অফার"}
 function showWishlist(){bestSellerMode=false;wishlistMode=true;currentCategory="";let all=getProducts();currentProducts=all.filter(p=>wishlist.includes(p.name));renderProducts(currentProducts);document.getElementById("productTitle").textContent="পছন্দের পণ্য"}
-function displayProducts(){let all=getProducts(),arr=all.filter(p=>{
+function displayProducts(){
+let all=getProducts(),arr=all.filter(p=>{
 let text=(p.name+" "+(p.brand||"")+" "+(p.category||"")+" "+(p.description||"")).toLowerCase();
 let cat=!currentCategory||p.category===currentCategory||p.cat===currentCategory;
 let sr=!searchTerm||text.includes(searchTerm);
 let bs=!bestSellerMode||(p.bestSeller===true||String(p.badge||"").toLowerCase().includes("best"));
 let wl=!wishlistMode||wishlist.includes(p.name);
-return cat&&sr&&bs&&wl});
+return cat&&sr&&bs&&wl
+});
 currentProducts=arr;renderProducts(arr);
-document.getElementById("productTitle").textContent=bestSellerMode?"বেস্ট সেলার":wishlistMode?"পছন্দের পণ্য":currentCategory||"সব পণ্য"}
-function renderProducts(arr){let box=document.getElementById("productContainer");document.getElementById("productCount").textContent=arr.length+"টি";
+document.getElementById("productTitle").textContent=bestSellerMode?"বেস্ট সেলার":wishlistMode?"পছন্দের পণ্য":currentCategory||"সব পণ্য"
+}
+function renderProducts(arr){
+let box=document.getElementById("productContainer");document.getElementById("productCount").textContent=arr.length+"টি";
 if(!arr.length){box.innerHTML='<div class="no-product">কোনো পণ্য পাওয়া যায়নি।</div>';return}
-box.innerHTML=arr.map((p,i)=>productHTML(p,i)).join("")}
-function variantsOf(p){if(Array.isArray(p.variants)&&p.variants.length)return p.variants;
-return[{brand:p.brand||"",size:p.size||"",price:p.price??0}]}
-function productHTML(p,i){let vs=variantsOf(p),v=vs[0]||{},wish=wishlist.includes(p.name),badge=p.badge||((p.bestSeller)?"BEST SELLER":"");
-return `<article class="product-card" data-index="${i}">${badge?`<span class="badge">${esc(badge)}</span>`:""}
+box.innerHTML=arr.map((p,i)=>productHTML(p,i)).join("")
+}
+function variantsOf(p){
+if(Array.isArray(p.variants)&&p.variants.length)return p.variants;
+return[{brand:p.brand||"",size:p.size||"",price:p.price??0}]
+}
+function productHTML(p,i){
+let vs=variantsOf(p),v=vs[0]||{},wish=wishlist.includes(p.name),badge=p.badge||((p.bestSeller)?"BEST SELLER":"");
+return `<article class="product-card" data-index="${i}">
+${badge?`<span class="badge">${esc(badge)}</span>`:""}
 <button class="wish ${wish?"active":""}" onclick="toggleWish(${JSON.stringify(p.name)})">${wish?"♥":"♡"}</button>
 <div class="product-img">${imageHTML(p)}</div>
 <div class="product-name">${esc(p.name)}</div>
@@ -272,42 +292,62 @@ return `<article class="product-card" data-index="${i}">${badge?`<span class="ba
 <button class="add-btn" onclick="addProduct(${i},0)">🛒 অর্ডার করুন</button>
 </article>`
 }
-function changeVariant(i,j){let p=currentProducts[i],v=variantsOf(p)[+j]||{};let el=document.getElementById("price-"+i);el.textContent=v.price?"৳"+v.price:"মূল্য পরে জানানো হবে";el.className=v.price?"price":"pending";}
-function addProduct(i,j){let p=currentProducts[i],v=variantsOf(p)[j]||variantsOf(p)[0]||{},key=p.name+"|"+(v.brand||"")+"|"+(v.size||""),old=cart.find(x=>x.key===key);
+function changeVariant(i,j){
+let p=currentProducts[i],v=variantsOf(p)[+j]||{};let el=document.getElementById("price-"+i);
+el.textContent=v.price?"৳"+v.price:"মূল্য পরে জানানো হবে";el.className=v.price?"price":"pending";
+}
+function addProduct(i,j){
+let p=currentProducts[i],v=variantsOf(p)[j]||variantsOf(p)[0]||{},key=p.name+"|"+(v.brand||"")+"|"+(v.size||""),old=cart.find(x=>x.key===key);
 if(old)old.qty++;else cart.push({key,name:p.name,brand:v.brand||"",size:v.size||"",price:Number(v.price)||0,qty:1});
-saveCart();updateCart();openOrderModal()}
-function toggleWish(name){if(wishlist.includes(name))wishlist=wishlist.filter(x=>x!==name);else wishlist.push(name);localStorage.setItem(WISH_KEY,JSON.stringify(wishlist));document.getElementById("wishCount").textContent=wishlist.length;if(wishlistMode)showWishlist();else displayProducts()}
+saveCart();updateCart();openOrderModal()
+}
+function toggleWish(name){
+if(wishlist.includes(name))wishlist=wishlist.filter(x=>x!==name);else wishlist.push(name);
+localStorage.setItem(WISH_KEY,JSON.stringify(wishlist));document.getElementById("wishCount").textContent=wishlist.length;
+if(wishlistMode)showWishlist();else displayProducts()
+}
 function saveCart(){localStorage.setItem(CART_KEY,JSON.stringify(cart))}
-function updateCart(){let n=cart.reduce((s,x)=>s+x.qty,0);document.getElementById("cartCount").textContent=n;document.getElementById("floatCartCount").textContent=n;document.getElementById("wishCount").textContent=wishlist.length}
+function updateCart(){
+let n=cart.reduce((s,x)=>s+x.qty,0);document.getElementById("cartCount").textContent=n;document.getElementById("floatCartCount").textContent=n;document.getElementById("wishCount").textContent=wishlist.length
+}
 function cartTotal(){return cart.reduce((s,x)=>s+x.price*x.qty,0)}
-function renderCart(){let box=document.getElementById("orderItems"),pending=cart.some(x=>!x.price);
+function renderCart(){
+let box=document.getElementById("orderItems"),pending=cart.some(x=>!x.price);
 if(!cart.length){box.innerHTML='<p style="text-align:center;padding:20px;color:#667085">আপনার কার্ট খালি।</p>'}
 else box.innerHTML=cart.map((x,i)=>`<div class="order-item"><div><b>${esc(x.name)}</b><br><small>${esc(x.brand)} ${esc(x.size)} ${x.price?"৳"+x.price:"মূল্য পরে জানানো হবে"}</small></div><div class="qty"><button onclick="changeQty(${i},-1)">−</button><b>${x.qty}</b><button onclick="changeQty(${i},1)">+</button></div><button onclick="removeCart(${i})" style="border:0;background:#fee2e2;color:#b91c1c;border-radius:7px;padding:5px">×</button></div>`).join("");
-let total=cartTotal(),delivery=cart.length?DELIVERY_CHARGE:0;document.getElementById("orderTotal").textContent="৳"+(total+delivery);document.getElementById("pendingNotice").textContent=pending?"⚠️ কিছু পণ্যের মূল্য পরে জানানো হবে।":""}
+let total=cartTotal(),delivery=cart.length?DELIVERY_CHARGE:0;document.getElementById("orderTotal").textContent="৳"+(total+delivery);document.getElementById("pendingNotice").textContent=pending?"⚠️ কিছু পণ্যের মূল্য পরে জানানো হবে।":""
+}
 function changeQty(i,n){cart[i].qty+=n;if(cart[i].qty<=0)cart.splice(i,1);saveCart();updateCart();renderCart()}
 function removeCart(i){cart.splice(i,1);saveCart();updateCart();renderCart()}
 function openOrderModal(){renderCart();document.getElementById("orderModal").classList.add("show")}
 function openRequestModal(){document.getElementById("requestModal").classList.add("show")}
 function closeModal(id){document.getElementById(id).classList.remove("show")}
-function sendOrder(){if(!cart.length)return alert("আপনার কার্ট খালি।");
+function sendOrder(){
+if(!cart.length)return alert("আপনার কার্ট খালি।");
 let name=document.getElementById("customerName").value.trim(),phone=document.getElementById("customerPhone").value.trim(),address=document.getElementById("customerAddress").value.trim(),note=document.getElementById("customerNote").value.trim();
 if(!name||!phone||!address)return alert("নাম, মোবাইল নম্বর ও ঠিকানা দিন।");
 let lines=["*SIX M STORE — নতুন অর্ডার*","","👤 নাম: "+name,"📱 মোবাইল: "+phone,"📍 ঠিকানা: "+address,"","🛒 পণ্য:"];
 cart.forEach((x,i)=>lines.push(`${i+1}. ${x.name} | ${x.brand} ${x.size} | ${x.qty}টি | ${x.price?"৳"+x.price:"মূল্য পরে জানানো হবে"}`));
 lines.push("","পণ্যের মোট: ৳"+cartTotal(),"ডেলিভারি: ৳"+DELIVERY_CHARGE,"*মোট: ৳"+(cartTotal()+DELIVERY_CHARGE)+"*");if(note)lines.push("","📝 নোট: "+note);
-window.open("https://wa.me/"+WA_NUMBER+"?text="+encodeURIComponent(lines.join("\n")),"_blank")}
-function sendProductRequest(){let n=document.getElementById("requestName").value.trim(),p=document.getElementById("requestPhone").value.trim(),product=document.getElementById("requestProduct").value.trim(),details=document.getElementById("requestDetails").value.trim();
+window.open("https://wa.me/"+WA_NUMBER+"?text="+encodeURIComponent(lines.join("\n")),"_blank")
+}
+function sendProductRequest(){
+let n=document.getElementById("requestName").value.trim(),p=document.getElementById("requestPhone").value.trim(),product=document.getElementById("requestProduct").value.trim(),details=document.getElementById("requestDetails").value.trim();
 if(!product)return alert("পণ্যের নাম লিখুন।");
 let msg=`*SIX M STORE — পণ্য চাই*\n\n👤 নাম: ${n||"দেওয়া হয়নি"}\n📱 মোবাইল: ${p||"দেওয়া হয়নি"}\n🛒 পণ্য: ${product}\n📝 বিস্তারিত: ${details||"দেওয়া হয়নি"}`;
-window.open("https://wa.me/"+WA_NUMBER+"?text="+encodeURIComponent(msg),"_blank")}
-function renderLive(){let all=getProducts().slice(0,20),box=document.getElementById("liveTrack");
+window.open("https://wa.me/"+WA_NUMBER+"?text="+encodeURIComponent(msg),"_blank")
+}
+function renderLive(){
+let all=getProducts().slice(0,20),box=document.getElementById("liveTrack");
 if(!all.length){box.innerHTML="";return}
 let data=all.concat(all);
-box.innerHTML=data.map(p=>`<div class="live-card">${imageHTML(p)}<b>${esc(p.name)}</b></div>`).join("")}
+box.innerHTML=data.map(p=>`<div class="live-card">${imageHTML(p)}<b>${esc(p.name)}</b></div>`).join("")
+}
 function scrollToId(id){document.getElementById(id)?.scrollIntoView({behavior:"smooth"})}
 function goTop(){window.scrollTo({top:0,behavior:"smooth"})}
 document.addEventListener("click",e=>{
-if(e.target.classList.contains("modal"))e.target.classList.remove("show")});
+if(e.target.classList.contains("modal"))e.target.classList.remove("show")
+});
 init();
 </script>
 </body>
