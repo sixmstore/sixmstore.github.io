@@ -232,15 +232,12 @@ function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&l
 function imgCandidates(p){let n=typeof p==="object"?p.image:p; if(!n)return[];
 if(/^https?:\/\//.test(n)||n.startsWith("data:"))return[n];
 let clean=n.replace(/^\.?\//,"").replace(/^images\//,"").replace(/^image\//,"");
-return["images/"+clean,"./images/"+clean,"image/"+clean,"./image/"+clean,clean,"images/"+clean+".jpg","images/"+clean+".png","image/"+clean+".jpg","image/"+clean+".png"]
-}
+return["images/"+clean,"./images/"+clean,"image/"+clean,"./image/"+clean,clean,"images/"+clean+".jpg","images/"+clean+".png","image/"+clean+".jpg","image/"+clean+".png"]}
 function imageHTML(p){let a=imgCandidates(p),src=a[0]||"";
-return `<img src="${esc(src)}" alt="${esc(p.name||"Product")}" loading="lazy" onerror="nextImage(this,${JSON.stringify(a)},0)">`
-}
+return `<img src="${esc(src)}" alt="${esc(p.name||"Product")}" loading="lazy" onerror="nextImage(this,${JSON.stringify(a)},0)">`}
 function nextImage(el,a,i){i++;if(i<a.length){el.src=a[i]}else{el.style.display="none"}}
 function init(){const cs=getCategories(),sel=document.getElementById("categorySelect");cs.forEach(c=>{let n=typeof c==="string"?c:c.name;if(n){let o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o)}});
-renderCategoryChips();displayProducts();renderLive();updateCart();
-}
+renderCategoryChips();displayProducts();renderLive();updateCart();}
 function renderCategoryChips(){let box=document.getElementById("categoryChips");box.innerHTML="";
 getCategories().forEach(c=>{let n=typeof c==="string"?c:c.name;if(n)box.innerHTML+=`<button class="chip ${currentCategory===n?"active":""}" onclick="selectCategory(${JSON.stringify(n)})">${esc(n)}</button>`})}
 function selectCategory(c){currentCategory=c||"";bestSellerMode=false;wishlistMode=false;document.getElementById("categorySelect").value=currentCategory;renderCategoryChips();displayProducts()}
@@ -250,8 +247,7 @@ function showBestSellers(){bestSellerMode=true;wishlistMode=false;currentCategor
 function showSpecialOffers(){bestSellerMode=false;wishlistMode=false;filterByBadge("offer")}
 function filterByBadge(b){bestSellerMode=false;wishlistMode=false;currentCategory="";let all=getProducts();currentProducts=all.filter(p=>String(p.badge||"").toLowerCase().includes(b)||p.offer||p.specialOffer);renderProducts(currentProducts);document.getElementById("productTitle").textContent="বিশেষ অফার"}
 function showWishlist(){bestSellerMode=false;wishlistMode=true;currentCategory="";let all=getProducts();currentProducts=all.filter(p=>wishlist.includes(p.name));renderProducts(currentProducts);document.getElementById("productTitle").textContent="পছন্দের পণ্য"}
-function displayProducts(){
-let all=getProducts(),arr=all.filter(p=>{
+function displayProducts(){let all=getProducts(),arr=all.filter(p=>{
 let text=(p.name+" "+(p.brand||"")+" "+(p.category||"")+" "+(p.description||"")).toLowerCase();
 let cat=!currentCategory||p.category===currentCategory||p.cat===currentCategory;
 let sr=!searchTerm||text.includes(searchTerm);
@@ -293,21 +289,18 @@ function removeCart(i){cart.splice(i,1);saveCart();updateCart();renderCart()}
 function openOrderModal(){renderCart();document.getElementById("orderModal").classList.add("show")}
 function openRequestModal(){document.getElementById("requestModal").classList.add("show")}
 function closeModal(id){document.getElementById(id).classList.remove("show")}
-function sendOrder(){
-if(!cart.length)return alert("আপনার কার্ট খালি।");
+function sendOrder(){if(!cart.length)return alert("আপনার কার্ট খালি।");
 let name=document.getElementById("customerName").value.trim(),phone=document.getElementById("customerPhone").value.trim(),address=document.getElementById("customerAddress").value.trim(),note=document.getElementById("customerNote").value.trim();
 if(!name||!phone||!address)return alert("নাম, মোবাইল নম্বর ও ঠিকানা দিন।");
 let lines=["*SIX M STORE — নতুন অর্ডার*","","👤 নাম: "+name,"📱 মোবাইল: "+phone,"📍 ঠিকানা: "+address,"","🛒 পণ্য:"];
 cart.forEach((x,i)=>lines.push(`${i+1}. ${x.name} | ${x.brand} ${x.size} | ${x.qty}টি | ${x.price?"৳"+x.price:"মূল্য পরে জানানো হবে"}`));
 lines.push("","পণ্যের মোট: ৳"+cartTotal(),"ডেলিভারি: ৳"+DELIVERY_CHARGE,"*মোট: ৳"+(cartTotal()+DELIVERY_CHARGE)+"*");if(note)lines.push("","📝 নোট: "+note);
 window.open("https://wa.me/"+WA_NUMBER+"?text="+encodeURIComponent(lines.join("\n")),"_blank")}
-function sendProductRequest(){
-let n=document.getElementById("requestName").value.trim(),p=document.getElementById("requestPhone").value.trim(),product=document.getElementById("requestProduct").value.trim(),details=document.getElementById("requestDetails").value.trim();
+function sendProductRequest(){let n=document.getElementById("requestName").value.trim(),p=document.getElementById("requestPhone").value.trim(),product=document.getElementById("requestProduct").value.trim(),details=document.getElementById("requestDetails").value.trim();
 if(!product)return alert("পণ্যের নাম লিখুন।");
 let msg=`*SIX M STORE — পণ্য চাই*\n\n👤 নাম: ${n||"দেওয়া হয়নি"}\n📱 মোবাইল: ${p||"দেওয়া হয়নি"}\n🛒 পণ্য: ${product}\n📝 বিস্তারিত: ${details||"দেওয়া হয়নি"}`;
 window.open("https://wa.me/"+WA_NUMBER+"?text="+encodeURIComponent(msg),"_blank")}
-function renderLive(){
-let all=getProducts().slice(0,20),box=document.getElementById("liveTrack");
+function renderLive(){let all=getProducts().slice(0,20),box=document.getElementById("liveTrack");
 if(!all.length){box.innerHTML="";return}
 let data=all.concat(all);
 box.innerHTML=data.map(p=>`<div class="live-card">${imageHTML(p)}<b>${esc(p.name)}</b></div>`).join("")}
