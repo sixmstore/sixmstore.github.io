@@ -107,7 +107,6 @@ variants:[
 {brand:"মটর",size:"৫ কেজি",price:250},
 {brand:"মাসকলাই ডাল",size:"১ কেজি",price:0},
 {brand:"খেসারি ডাল",size:"১ কেজি",price:0},
-{brand:"অড়হর ডাল",size:"১ কেজি",price:0},
 {brand:"ছোলার ডাল",size:"১ কেজি",price:0}   
 ]  
 },  
