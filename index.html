@@ -283,22 +283,6 @@ footer{padding-bottom:90px}
 .welcome-video-overlay .welcome-order{font-size:11px}
 }
 
-
-/* ===== NEW MERGED IMPROVEMENTS ===== */
-.trust-badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px auto 4px}
-.trust-badges span{background:#eaf4fd;border:1px solid #c8dced;color:#063b8f;border-radius:20px;padding:7px 13px;font-size:12px;font-weight:800}
-.play-hint{font-size:12px;background:rgba(0,0,0,.55);color:#fff;padding:6px 12px;border-radius:20px;margin-top:10px;display:inline-block}
-.reviews-section{background:#fff;border:1px solid #cbddeb;border-radius:14px;padding:18px;margin:24px 0;box-shadow:0 4px 13px rgba(6,59,143,.06)}
-.reviews-section h2{font-size:19px;color:#063b8f;margin-bottom:12px}
-.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.review-card{background:#f7fbff;border:1px solid #dbe9f5;border-radius:12px;padding:14px}
-.review-card .stars{color:#f5a623;font-size:14px}
-.review-card p{font-size:13px;margin:6px 0}
-.review-card b{font-size:12px;color:#063b8f}
-@media(max-width:700px){.reviews-grid{grid-template-columns:1fr}}
-.best-seller-strip{background:linear-gradient(135deg,#063b8f,#0875d1);color:#fff;border-radius:14px;padding:16px;margin:18px 0;text-align:center}
-.best-seller-strip h2{font-size:18px}
-.best-seller-strip p{font-size:13px;opacity:.9}
 </style>
 </head>
 
@@ -357,7 +341,7 @@ footer{padding-bottom:90px}
 <div class="welcome-section">
 <div class="welcome-video-box">
 
-<video class="welcome-video" muted loop playsinline preload="none" poster="logo.jpg" id="welcomeVideo" onclick="this.play();this.setAttribute('controls','')">
+<video class="welcome-video" autoplay muted loop playsinline preload="metadata">
 <source src="welcome-video.mp4" type="video/mp4">
 আপনার ব্রাউজার ভিডিওটি চালাতে পারছে না।
 </video>
@@ -371,7 +355,7 @@ footer{padding-bottom:90px}
 <span>🛒 সহজেই আপনার কেনাকাটা সম্পন্ন করুন।</span>
 </div>
 
-<div class="welcome-order" onclick="scrollToProducts()">👇 এখনই অর্ডার করুন!</div><div><span class="play-hint" onclick="document.getElementById('welcomeVideo').play()">▶ ভিডিও দেখতে ক্লিক করুন </span></div><div class="trust-badges"><span>⚡ ২৪ ঘণ্টায় ডেলিভারি</span><span>💵 Cash On Delivery</span><span>✅ Easy Return</span><span>🚚 ডেলিভারি মাত্র ৯৯/-</span></div>
+<div class="welcome-order">👇 এখনই অর্ডার করুন!</div>
 </div>
 
 </div>
@@ -504,10 +488,10 @@ footer{padding-bottom:90px}
 <label>🛍️ কোন পণ্য চান? *</label>
 <input type="text" id="requestProductName" placeholder="পণ্যের নাম লিখুন" autocomplete="off">
 
-<label>🏷️ ব্র্যান্ড (ঐচ্ছিক)</label>
+<label>🏷️ ব্র্যান্ড (যদি জানা থাকে)</label>
 <input type="text" id="requestBrand" placeholder="যেমন: Fresh, Radhuni, Lux">
 
-<label>📦 সাইজ / ওজন (ঐচ্ছিক)</label>
+<label>📦 সাইজ / ওজন / পরিমাণ</label>
 <input type="text" id="requestSize" placeholder="যেমন: ৫০০ গ্রাম, ১ লিটার, ১ প্যাকেট">
 
 <label>👤 আপনার নাম *</label>
@@ -525,13 +509,6 @@ footer{padding-bottom:90px}
 </div>
 </div>
 
-
-<div class="best-seller-strip"><h2>🔥 আজকের বেস্ট সেলার — চাল, তেল, ডাল, কোল্ড ড্রিংকস</h2><p>প্রোডাক্টে ক্লিক করে ব্র্যান্ড + সাইজ সিলেক্ট করে সরাসরি অর্ডার করুন। প্রোডাক্টের নাম অটো অর্ডার ফর্মে বসে যাবে।</p></div>
-<div class="reviews-section"><h2>⭐ আমাদের কাস্টমাররা কী বলেন</h2><div class="reviews-grid">
-<div class="review-card"><div class="stars">★★★★★</div><p>"চট্টগ্রামে এত তাড়াতাড়ি ডেলিভারি পাবো ভাবিনি। চাল আর তেল একসাথে অর্ডার করছিলাম, ৩ ঘণ্টায় চলে আসছে।"</p><b>— রহিম, চকবাজার, চট্টগ্রাম</b></div>
-<div class="review-card"><div class="stars">★★★★★</div><p>"WhatsApp এ অর্ডার করা এত সহজ! দাম আগে থেকে জানায় দেয়, কোনো ঝামেলা নাই।"</p><b>— নাসরিন, জিইসি, চট্টগ্রাম</b></div>
-<div class="review-card"><div class="stars">★★★★☆</div><p>"দোকানে যেটা পাই না, সেটাও এনে দেয়। ক্যাশ অন ডেলিভারি তাই বিশ্বাস করে অর্ডার করি।"</p><b>— সাকিব, বহদ্দারহাট, চট্টগ্রাম</b></div>
-</div></div>
 <footer>
 <h2>SIX M STORE</h2>
 <p>🤝 আপনার বিশ্বাসই আমাদের মূলধন।</p>
